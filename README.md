@@ -1,6 +1,6 @@
-## <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Hi.gif" width="29px"> I'm Aris187 ID
+## <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Hi.gif" width="29px"> FEITO E TRADUZIDO POR: DARK YT
 <p align="center">
-<img src="https://raw.githubusercontent.com/A187ID/AR15BOT/main/temp/A187.jpg" width="230" height="230"/>
+<img src="https://media-giphy-com.cdn.ampproject.org/ii/w820/s/media.giphy.com/media/1g3A0gpaidxWcL9Mfo/giphy.gif" width="230" height="230"/>
 </p>
 <br>
 
@@ -28,18 +28,16 @@
  
 </details>
 
-### WARNING
-MAU RE-UPLOAD SCRIPT? KASIH NAMA/LINK CHANEL SAYA.... DILARANG UBAH INFO!!!
+### ATENÇÃO
+DESEJA RE-CARREGAR O SCRIPT? AMO MEU NOME / LINK CHANEL .... NÃO ALTERE A INFORMAÇÃO !!!
 
-## NOTE:> 
-SCRIPTNYA JANGAN DI JUAL/BELI KAN.. SCRIPT INI 100% GRATIS BUAT KALIAN PENGGUNA TERMUX
+## NOTA:>
+NÃO VENDE / COMPRE O SCRIPT, ESTE SCRIPT É 100% GRATUITO PARA OS USUÁRIOS DO TERMUX
 </div>
 
 ### FERRAMENTAS E MATERIAIS <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Mario_Hello_Big.gif" width="29px">
 Prepare as ferramentas e materiais.
 `` `bash
-> niat
-> niat
 > 2 telefones celulares (1 para executar SC, 1 para ler o código QR sis)
 > rede de internet rápida, cota +
 > armazenamento adequado
@@ -47,9 +45,8 @@ Prepare as ferramentas e materiais.
 > aplicativo termux
 > café + cigarros KKKK;-;
 ```
-### COMO INSTALAR <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Mario_Hello_Big.gif" width="29px">
-Prepare as ferramentas e materiais.
-`` `bash
+INSTALAÇÃO:
+
 > Se você não tiver o APK Termux, baixe-o na Playstore
 > entre no apk termux e digite abaixo!
 > termux-setup-storage
