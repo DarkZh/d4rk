@@ -8,6 +8,101 @@
 * ARIS187 ID
 * BOLEH UBAH TAPI KECUALI INFO!!!
 */
+const { create, Client } = require('@open-wa/wa-automate')
+const figlet = require('figlet')
+const options = require('./utils/options')
+const { color, messageLog } = require('./utils')
+const HandleMsg = require('./HandleMsg')
+
+const start = (aruga = new Client()) => {
+    console.log(color(figlet.textSync('----------------', { horizontalLayout: 'default' })))
+    console.log(color(figlet.textSync('ARUGA BOT', { font: 'Ghost', horizontalLayout: 'default' })))
+    console.log(color(figlet.textSync('----------------', { horizontalLayout: 'default' })))
+    console.log(color('[DEV]'), color('ArugaZ', 'yellow'))
+    console.log(color('[~>>]'), color('BOT Started!', 'green'))
+
+    // Mempertahankan sesi agar tetap nyala
+    aruga.onStateChanged((state) => {
+        console.log(color('[~>>]', 'red'), state)
+        if (state === 'CONFLICT' || state === 'UNLAUNCHED') aruga.forceRefocus()
+    })
+
+    // ketika bot diinvite ke dalam group
+    aruga.onAddedToGroup(async (chat) => {
+	const groups = await aruga.getAllGroups()
+	// kondisi ketika batas group bot telah tercapai,ubah di file settings/setting.json
+	if (groups.length > groupLimit) {
+	await aruga.sendText(chat.id, `Sorry, the group on this Bot is full\nMax Group is: ${groupLimit}`).then(() => {
+	      aruga.leaveGroup(chat.id)
+	      aruga.deleteChat(chat.id)
+	  }) 
+	} else {
+	// kondisi ketika batas member group belum tercapai, ubah di file settings/setting.json
+	    if (chat.groupMetadata.participants.length < memberLimit) {
+	    await aruga.sendText(chat.id, `Sorry, Bot comes out if the group members do not exceed ${memberLimit} people`).then(() => {
+	      aruga.leaveGroup(chat.id)
+	      aruga.deleteChat(chat.id)
+	    })
+	    } else {
+        await aruga.simulateTyping(chat.id, true).then(async () => {
+          await aruga.sendText(chat.id, `Hai minna~, Im Aruga Bot. To find out the commands on this bot type ${prefix}menu`)
+        })
+	    }
+	}
+    })
+
+    // ketika seseorang masuk/keluar dari group
+    aruga.onGlobalParicipantsChanged(async (event) => {
+        const host = await aruga.getHostNumber() + '@c.us'
+		const welcome = JSON.parse(fs.readFileSync('./settings/welcome.json'))
+		const isWelcome = welcome.includes(event.chat)
+		let profile = await aruga.getProfilePicFromServer(event.who)
+		if (profile == '' || profile == undefined) profile = 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTQcODjk7AcA4wb_9OLzoeAdpGwmkJqOYxEBA&usqp=CAU'
+        // kondisi ketika seseorang diinvite/join group lewat link
+        if (event.action === 'add' && event.who !== host && isWelcome) {
+			await aruga.sendFileFromUrl(event.chat, profile, 'profile.jpg', '')
+            await aruga.sendTextWithMentions(event.chat, `Hello, Welcome to the group @${event.who.replace('@c.us', '')} \n\nHave fun with us✨`)
+        }
+        // kondisi ketika seseorang dikick/keluar dari group
+        if (event.action === 'remove' && event.who !== host) {
+			await aruga.sendFileFromUrl(event.chat, profile, 'profile.jpg', '')
+            await aruga.sendTextWithMentions(event.chat, `Good bye @${event.who.replace('@c.us', '')}, We'll miss you✨`)
+        }
+    })
+
+    aruga.onIncomingCall(async (callData) => {
+        // ketika seseorang menelpon nomor bot akan mengirim pesan
+        await aruga.sendText(callData.peerJid, 'Maaf sedang tidak bisa menerima panggilan.\n\n-bot')
+        .then(async () => {
+            // bot akan memblock nomor itu
+            await aruga.contactBlock(callData.peerJid)
+        })
+    })
+
+    // ketika seseorang mengirim pesan
+    aruga.onMessage(async (message) => {
+        aruga.getAmountOfLoadedMessages() // menghapus pesan cache jika sudah 3000 pesan.
+            .then((msg) => {
+                if (msg >= 3000) {
+                    console.log('[aruga]', color(`Loaded Message Reach ${msg}, cuting message cache...`, 'yellow'))
+                    aruga.cutMsgCache()
+                }
+            })
+        HandleMsg(aruga, message)    
+    
+    })
+	
+    // Message log for analytic
+    aruga.onAnyMessage((anal) => { 
+        messageLog(anal.fromMe, anal.type)
+    })
+}
+
+//create session
+create(options(true, start))
+    .then((aruga) => start(aruga))
+    .catch((err) => new Error(err))
+
 const qrcode = require("qrcode-terminal")
 const moment = require("moment-timezone")
 const fs = require("fs")
@@ -18,7 +113,7 @@ const arrayBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Jul
 const bulan = arrayBulan[moment().format('MM') - 1]
 
 const config = {
-    A187: '👾D4RKBOT👾',
+    A187: 'ðŸ‘¾D4RKBOTðŸ‘¾',
     instagram: 'OFF',
     nomer: 'wa.me/21997123716',
     aktif: '24 JAM',
@@ -182,7 +277,7 @@ client.on('message-new', async (m) => {
            ytdl('mp3', value)
                .then(data => {
                    const { judul, size, hasil: link } = data
-                   let hasil = `✄1�7 Lagu Berhasil Di Download, silahkan klik link dan download hasilnya\nKlik link dibawah🗡️\n\nJudul: ${judul}\n\nUkuran audio: ${size}\n\nLink: ${link}`
+                   let hasil = `âœ„1¤7 Lagu Berhasil Di Download, silahkan klik link dan download hasilnya\nKlik link dibawahðŸ—¡ï¸\n\nJudul: ${judul}\n\nUkuran audio: ${size}\n\nLink: ${link}`
                    client.sendMessage(id, '[ESPERE UM POUCO...', MessageType.text)
                    client.sendMessage(id, hasil, MessageType.text)
                })
@@ -194,7 +289,7 @@ client.on('message-new', async (m) => {
            ytdl('mp4', value)
                .then(data => {
                    const { judul, size, hasil: link } = data
-                   let hasil = `✄1�7 Video Berhasil Di Download, silahkan klik link dan download hasilnya\nKlik link dibawah🗡️\n\nJudul: ${judul}\n\nUkuran audio: ${size}\n\nLink: ${link}`
+                   let hasil = `âœ„1¤7 Video Berhasil Di Download, silahkan klik link dan download hasilnya\nKlik link dibawahðŸ—¡ï¸\n\nJudul: ${judul}\n\nUkuran audio: ${size}\n\nLink: ${link}`
                    client.sendMessage(id, '[ESPERE UM POUCO...', MessageType.text)
                    client.sendMessage(id, hasil, MessageType.text)
                })
@@ -206,7 +301,7 @@ client.on('message-new', async (m) => {
            tweetdl(value)
                .then(data => {
                     const { size, hasil: link } = data
-                    let hasil = `✄1�7 Berhasil! silahkan klik link di bawah untuk mendownload hasilnya!\nKlik link dibawah🗡️\n\nSize: ${size}\n\nLink: ${link}`
+                    let hasil = `âœ„1¤7 Berhasil! silahkan klik link di bawah untuk mendownload hasilnya!\nKlik link dibawahðŸ—¡ï¸\n\nSize: ${size}\n\nLink: ${link}`
                     client.sendMessage(id, '[ESPERE UM POUCO...', MessageType.text)
                     client.sendMessage(id, hasil ,MessageType.text)
                })
@@ -218,7 +313,7 @@ client.on('message-new', async (m) => {
            tiktokdl(value)
                .then(data => {
                     const { url, nama, durasi, deskripsi } = data
-                    let hasil = `✄1�7 Berhasil!!! Silahkan klik link dibawah ini untuk mendownload hasilnya! \nKlik link dibawah🗡️\n\nJudul: ${deskripsi} \n\nDurasi: ${durasi}\n\nNama: ${nama}\n\nUrl: ${url}`;
+                    let hasil = `âœ„1¤7 Berhasil!!! Silahkan klik link dibawah ini untuk mendownload hasilnya! \nKlik link dibawahðŸ—¡ï¸\n\nJudul: ${deskripsi} \n\nDurasi: ${durasi}\n\nNama: ${nama}\n\nUrl: ${url}`;
                     client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -229,7 +324,7 @@ client.on('message-new', async (m) => {
            wiki(value)
                .then(data => {
                     const { hasil: res } = data
-                    let hasil = `📝Menurut Wikipedia:\n\n${res}`
+                    let hasil = `ðŸ“Menurut Wikipedia:\n\n${res}`
                     client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -240,7 +335,7 @@ client.on('message-new', async (m) => {
            jsholat(value)
                .then(data => {
                    const { Imsyak, Subuh, Dzuhur, Ashar, Maghrib, Isya, Dhuha } = data
-                   let hasil = `Jadwal sholat di *${value}* hari ini adalah\n\n⚡Imsyak : ${Imsyak}\n⚡Subuh : ${Subuh} WIB\n⚡Dzuhur : ${Dzuhur}WIB\n⚡Ashar : ${Ashar} WIB\n⚡Maghrib : ${Maghrib}\n⚡Isya : ${Isya} WIB\n⚡Tengah malam : ${Dhuha} WIB`
+                   let hasil = `Jadwal sholat di *${value}* hari ini adalah\n\nâš¡Imsyak : ${Imsyak}\nâš¡Subuh : ${Subuh} WIB\nâš¡Dzuhur : ${Dzuhur}WIB\nâš¡Ashar : ${Ashar} WIB\nâš¡Maghrib : ${Maghrib}\nâš¡Isya : ${Isya} WIB\nâš¡Tengah malam : ${Dhuha} WIB`
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -278,7 +373,7 @@ client.on('message-new', async (m) => {
            corona()
                .then(data => {
                    const { meninggal, sembuh, positif } = data
-                   let hasil = `📌DATA WABAH COVID-19 TERBARU DI INDONESIA\n\n📍Positif ==> ${positif} \n📍Sembuh ==> ${sembuh} \n📍Meninggal ==> ${meninggal}`
+                   let hasil = `ðŸ“ŒDATA WABAH COVID-19 TERBARU DI INDONESIA\n\nðŸ“Positif ==> ${positif} \nðŸ“Sembuh ==> ${sembuh} \nðŸ“Meninggal ==> ${meninggal}`
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -360,7 +455,7 @@ client.on('message-new', async (m) => {
            lirik(value)
                .then(data => {
                    const { hasil: lirik } = data
-                   let hasil = `📍lirik lagu📍 *${value}* \n\n\n${lirik}`
+                   let hasil = `ðŸ“lirik laguðŸ“ *${value}* \n\n\n${lirik}`
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -371,7 +466,7 @@ client.on('message-new', async (m) => {
            fb(value)
                .then(data => {
                    const { resultHD, resultSD } = data
-                   let hasil = `Pilih resolusi nya sayang😙 \n\n\n HD ${resultHD} \n\n\n SD ${resultSD}`
+                   let hasil = `Pilih resolusi nya sayangðŸ˜™ \n\n\n HD ${resultHD} \n\n\n SD ${resultSD}`
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -409,8 +504,8 @@ client.on('message-new', async (m) => {
            igStalk(value)
                .then(data => {
                    const { Username, Jumlah_Followers, Jumlah_Following, Name, Jumlah_Post } = data
-                   client.sendMessage(id, '[WAIT] Stalking...⏄1�7', MessageType.text)
-                   let hasil = `✨Biodata Instagram _${value}_ \n\n 🧶 *Username* : ${Username}_ \n 🌀 *Nama* : _${Name}_ \n 🌟 *Jumlah Followers* : _${Jumlah_Followers}_ \n 🌠 *Jumlah_Following* : _${Jumlah_Following}_ \n ⭄1�7 *Jumlah_Post* : _${Jumlah_Post}_ `
+                   client.sendMessage(id, '[WAIT] Stalking...â„1¤7', MessageType.text)
+                   let hasil = `âœ¨Biodata Instagram _${value}_ \n\n ðŸ§¶ *Username* : ${Username}_ \n ðŸŒ€ *Nama* : _${Name}_ \n ðŸŒŸ *Jumlah Followers* : _${Jumlah_Followers}_ \n ðŸŒ  *Jumlah_Following* : _${Jumlah_Following}_ \n â­„1¤7 *Jumlah_Post* : _${Jumlah_Post}_ `
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -465,7 +560,7 @@ case 'puisi2':
            chord(value)
                .then(data => {
                    const { result } = data
-                   let hasil = `Nih chord lagu *${value}* sayang ♥️\n\n  _${result}_ `
+                   let hasil = `Nih chord lagu *${value}* sayang â™¥ï¸\n\n  _${result}_ `
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -475,7 +570,7 @@ case 'puisi2':
            kbbi(value)
                .then(data => {
                    const { result } = data
-                   let hasil = `*${value}* menurut KBBI ️\n\n  _${result}_ `
+                   let hasil = `*${value}* menurut KBBI ï¸\n\n  _${result}_ `
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -509,7 +604,7 @@ case 'puisi2':
            wikien(value)
                .then(data => {
                    const { result } = data
-                   let hasil = `*♻️According to Wikipedia🗿:* \n\n  _${result}_ `
+                   let hasil = `*â™»ï¸According to WikipediaðŸ—¿:* \n\n  _${result}_ `
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -586,7 +681,7 @@ case 'gay':
            indohot()
                .then(data => {
                    const { judul, genre, durasi, url } = data
-                   let hasil = `Tobat GOBLOK😙* \n\n *Judul* _${judul}_ \n\n *Status* _${genre}_ \n\n *Durasi* _${durasi}_ \n\n *Link Bosq* _${url}_  `
+                   let hasil = `Tobat GOBLOKðŸ˜™* \n\n *Judul* _${judul}_ \n\n *Status* _${genre}_ \n\n *Durasi* _${durasi}_ \n\n *Link Bosq* _${url}_  `
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -619,7 +714,7 @@ case 'filmanime':
            namaninja(value)
                .then(data => {
                    const { ninja } = data
-                   let hasil = `Nama Ninja *${value}*💡:\n\n _${ninja}_ `
+                   let hasil = `Nama Ninja *${value}*ðŸ’¡:\n\n _${ninja}_ `
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -641,7 +736,7 @@ case 'filmanime':
            bitly(value)
                .then(data => {
                    const { result } = data
-                   let hasil = `Nih kak udah jadi☣️ :) \n\n${result} `
+                   let hasil = `Nih kak udah jadiâ˜£ï¸ :) \n\n${result} `
                    client.sendMessage(id, hasil, MessageType.text)
                })
                .catch(err => {
@@ -787,7 +882,7 @@ case 'filmanime':
             if (isMedia) {
                 if (mimetype === 'video/mp4' && message.duration < 10 || mimetype === 'image/gif' && message.duration < 10) {
                     const mediaData = await decryptMedia(message, uaOverride)
-                    client.reply(from, '[WAIT] Sedang di proses⏄1�7 silahkan tunggu ± 1 min!', id)
+                    client.reply(from, '[WAIT] Sedang di prosesâ„1¤7 silahkan tunggu Â± 1 min!', id)
                     const filename = `./media/aswu.${mimetype.split('/')[1]}`
                     await fs.writeFileSync(filename, mediaData)
                     await exec(`gify ${filename} ./media/output.gif --fps=30 --scale=240:240`, async function (error, stdout, stderr) {
@@ -795,7 +890,7 @@ case 'filmanime':
                         await client.sendImageAsSticker(from, `data:image/gif;base64,${gif.toString('base64')}`)
                     })
                 } else (
-                    client.reply(from, '[❗] Kirim video dengan caption *!stickerGif* max 10 sec!', id)
+                    client.reply(from, '[â—] Kirim video dengan caption *!stickerGif* max 10 sec!', id)
                 )
             }
             break     
